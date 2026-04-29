@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br" data-bs-theme="dark">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,14 +10,33 @@
 <title>Dashboard</title>
 
 <style>
+
+body{
+    min-height: 100vh;
+}
+
 .container-box{
-    max-width: 800px;
+    max-width: 900px;
     margin: auto;
 }
 
 .card{
-    border-radius: 10px;
+    border-radius: 12px;
+    transition: 0.2s;
 }
+
+.card:hover{
+    transform: scale(1.01);
+}
+
+.atrasada{
+    border: 2px solid #dc3545;
+}
+
+.badge-atrasada{
+    background-color: #dc3545;
+}
+
 </style>
 
 </head>
@@ -25,28 +45,43 @@
 
 <div class="container py-5 container-box">
 
-  <!-- HEADER -->
-  <div class="text-center mb-4">
-    <h2>Minhas Atividades</h2>
-    <p class="text-secondary">Organize seus estudos 📚</p>
-  </div>
+    <!-- TOPO -->
+    <div class="text-center mb-5">
 
-  <!-- BOTÃO -->
-  <div class="d-flex justify-content-between mb-3">
-    <a href="atividade.html" class="btn btn-success">+ Nova atividade</a>
-  </div>
+        <h1 class="fw-bold">Dashboard de Atividades</h1>
 
-  <!-- LISTA -->
-  <div id="listaAtividades"></div>
+        <p class="text-secondary">
+            Gerencie suas tarefas acadêmicas 📚
+        </p>
+
+    </div>
+
+    <!-- BOTÕES -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <a href="atividade.html" class="btn btn-success">
+            + Nova atividade
+        </a>
+
+        <a href="index.html" class="btn btn-outline-light">
+            Sair
+        </a>
+
+    </div>
+
+    <!-- LISTA -->
+    <div id="listaAtividades"></div>
 
 </div>
 
 <script>
+
 function formatarData(data){
     return new Date(data).toLocaleDateString('pt-BR');
 }
 
 function carregarAtividades(){
+
     let atividades = JSON.parse(localStorage.getItem("atividades")) || [];
 
     let container = document.getElementById("listaAtividades");
@@ -54,30 +89,124 @@ function carregarAtividades(){
     container.innerHTML = "";
 
     if(atividades.length === 0){
+
         container.innerHTML = `
-        <div class="text-center mt-5">
-            <h5 class="text-secondary">Nenhuma atividade cadastrada 😢</h5>
-        </div>
+            <div class="text-center mt-5">
+                <h5 class="text-secondary">
+                    Nenhuma atividade cadastrada 😢
+                </h5>
+            </div>
         `;
+
         return;
     }
 
-    atividades.forEach(atividade => {
+    atividades.forEach((atividade, index) => {
+
+        let hoje = new Date();
+        let dataEntrega = new Date(atividade.data);
+
+        let atrasada = dataEntrega < hoje;
+
+        let cardClasse = atrasada ? "atrasada" : "";
+
+        let status = atrasada
+        ? `<span class="badge badge-atrasada">Atrasada</span>`
+        : `<span class="badge bg-success">Em dia</span>`;
 
         let card = `
-        <div class="card p-3 mb-3 shadow-sm">
-            <h5>${atividade.titulo}</h5>
-            <p class="text-secondary">${atividade.descricao}</p>
-            <p><strong>Disciplina:</strong> ${atividade.disciplina}</p>
-            <p><strong>Data:</strong> ${formatarData(atividade.data)}</p>
+
+        <div class="card shadow-sm p-4 mb-4 ${cardClasse}">
+
+            <div class="d-flex justify-content-between align-items-start">
+
+                <div>
+
+                    <h4>${atividade.titulo}</h4>
+
+                    <p class="text-secondary mb-2">
+                        ${atividade.descricao}
+                    </p>
+
+                    <p>
+                        <strong>Disciplina:</strong>
+                        ${atividade.disciplina}
+                    </p>
+
+                    <p>
+                        <strong>Entrega:</strong>
+                        ${formatarData(atividade.data)}
+                    </p>
+
+                    <p>
+                        <strong>Prioridade:</strong>
+                        ${atividade.prioridade}
+                    </p>
+
+                    ${status}
+
+                </div>
+
+                <!-- BOTÕES -->
+                <div class="d-flex gap-2">
+
+                    <button
+                        class="btn btn-warning"
+                        onclick="editarAtividade(${index})">
+                        ✏️
+                    </button>
+
+                    <button
+                        class="btn btn-danger"
+                        onclick="excluirAtividade(${index})">
+                        🗑️
+                    </button>
+
+                </div>
+
+            </div>
+
         </div>
+
         `;
 
         container.innerHTML += card;
+
     });
+
+}
+
+function excluirAtividade(index){
+
+    let atividades = JSON.parse(localStorage.getItem("atividades")) || [];
+
+    let confirmar = confirm("Deseja excluir esta atividade?");
+
+    if(confirmar){
+
+        atividades.splice(index, 1);
+
+        localStorage.setItem(
+            "atividades",
+            JSON.stringify(atividades)
+        );
+
+        carregarAtividades();
+
+    }
+
+}
+
+function editarAtividade(index){
+
+    localStorage.setItem("editarIndex", index);
+
+    window.location.href = "atividade.html";
+
 }
 
 carregarAtividades();
+
 </script>
 
 </body>
