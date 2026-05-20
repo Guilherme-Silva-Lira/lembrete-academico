@@ -204,7 +204,10 @@ let atividades =
     JSON.parse(localStorage.getItem("atividades")) || [];
 
 
-// EDITAR
+// ==========================
+// EDITAR ATIVIDADE
+// ==========================
+
 if(editarId){
 
     let atividade =
@@ -227,12 +230,19 @@ if(editarId){
         document.getElementById("descricao")
             .value = atividade.descricao;
 
+    }else{
+
+        localStorage.removeItem("editarId");
+
     }
 
 }
 
 
+// ==========================
 // SALVAR
+// ==========================
+
 form.addEventListener("submit", function(e){
 
     e.preventDefault();
@@ -252,22 +262,27 @@ form.addEventListener("submit", function(e){
     let descricao =
         document.getElementById("descricao").value;
 
+
     // NOVA ATIVIDADE
     let novaAtividade = {
 
         id: Date.now(),
 
-        titulo,
-        disciplina,
-        data,
-        prioridade,
-        descricao,
+        titulo: titulo,
+        disciplina: disciplina,
+        data: data,
+        prioridade: prioridade,
+        descricao: descricao,
 
         concluida: false
 
     };
 
+
+    // ==========================
     // EDITAR
+    // ==========================
+
     if(editarId){
 
         let index =
@@ -275,30 +290,36 @@ form.addEventListener("submit", function(e){
                 a => a.id == editarId
             );
 
-        novaAtividade.id =
-            Number(editarId);
+        if(index !== -1){
 
-        novaAtividade.concluida =
-            atividades[index].concluida;
+            novaAtividade.id =
+                atividades[index].id;
 
-        atividades[index] =
-            novaAtividade;
+            novaAtividade.concluida =
+                atividades[index].concluida;
+
+            atividades[index] =
+                novaAtividade;
+
+        }
 
         localStorage.removeItem("editarId");
 
     }else{
 
+        // NOVA
         atividades.push(novaAtividade);
 
     }
 
+
+    // SALVAR LOCALSTORAGE
     localStorage.setItem(
         "atividades",
         JSON.stringify(atividades)
     );
 
-    alert("Atividade salva com sucesso! ✅");
-
+    // REDIRECIONAR
     window.location.href =
         "dashboard.html";
 
