@@ -13,7 +13,7 @@
 
 body{
     min-height: 100vh;
-    background:  #212529;
+    background-color: #212529;
 }
 
 .container-box{
@@ -73,13 +73,17 @@ body{
 }
 
 .card-atividade{
-    background: #2a2a40;
+    background: #2b3035;
 }
 
 .topbar{
-    background:  #212529;
+    background: #2b3035;
     border-radius: 18px;
     padding: 20px;
+}
+
+.info-card{
+    background: #2b3035;
 }
 
 </style>
@@ -134,7 +138,7 @@ body{
 
         <div class="col-md-3">
 
-            <div class="card stats-card shadow">
+            <div class="card stats-card info-card shadow">
 
                 <div class="stats-number"
                      id="totalAtividades">
@@ -151,7 +155,7 @@ body{
 
         <div class="col-md-3">
 
-            <div class="card stats-card shadow">
+            <div class="card stats-card info-card shadow">
 
                 <div class="stats-number text-warning"
                      id="pendentes">
@@ -168,7 +172,7 @@ body{
 
         <div class="col-md-3">
 
-            <div class="card stats-card shadow">
+            <div class="card stats-card info-card shadow">
 
                 <div class="stats-number text-danger"
                      id="atrasadas">
@@ -185,18 +189,33 @@ body{
 
         <div class="col-md-3">
 
-            <div class="card stats-card shadow">
+            <div class="card stats-card info-card shadow">
 
-                <div class="stats-number text-success"
-                     id="emDia">
+                <div class="stats-number text-danger"
+                     id="altaPrioridade">
 
                     0
 
                 </div>
 
-                <p>Em dia</p>
+                <p>Alta prioridade</p>
 
             </div>
+
+        </div>
+
+    </div>
+
+    <!-- PRÓXIMA ENTREGA -->
+    <div class="card info-card shadow p-4 mb-5">
+
+        <h4 class="mb-3">
+            ⏰ Próxima entrega
+        </h4>
+
+        <div id="proximaEntrega">
+
+            Nenhuma atividade cadastrada
 
         </div>
 
@@ -234,6 +253,7 @@ function formatarData(data){
 function prioridadeValor(prioridade){
 
     if(prioridade === "Alta") return 1;
+
     if(prioridade === "Média") return 2;
 
     return 3;
@@ -287,7 +307,8 @@ function carregarAtividades(){
     let total = atividades.length;
 
     let atrasadas = 0;
-    let emDia = 0;
+
+    let altaPrioridade = 0;
 
     document.getElementById("totalAtividades")
         .innerText = total;
@@ -308,9 +329,39 @@ function carregarAtividades(){
 
         `;
 
+        document.getElementById("proximaEntrega")
+            .innerHTML =
+            "Nenhuma atividade cadastrada";
+
         return;
 
     }
+
+    // PRÓXIMA ENTREGA
+    let proxima = atividades[0];
+
+    document.getElementById("proximaEntrega")
+        .innerHTML = `
+
+        <h5 class="mb-2">
+
+            ${proxima.titulo}
+
+        </h5>
+
+        <p class="mb-1">
+
+            📘 ${proxima.disciplina}
+
+        </p>
+
+        <p class="mb-0">
+
+            📅 ${formatarData(proxima.data)}
+
+        </p>
+
+        `;
 
     atividades.forEach((atividade, index) => {
 
@@ -320,6 +371,12 @@ function carregarAtividades(){
             .includes(pesquisa)
         ){
             return;
+        }
+
+        if(atividade.prioridade === "Alta"){
+
+            altaPrioridade++;
+
         }
 
         let hoje = new Date();
@@ -335,10 +392,6 @@ function carregarAtividades(){
         if(atrasada){
 
             atrasadas++;
-
-        }else{
-
-            emDia++;
 
         }
 
@@ -456,8 +509,8 @@ function carregarAtividades(){
     document.getElementById("pendentes")
         .innerText = total - atrasadas;
 
-    document.getElementById("emDia")
-        .innerText = emDia;
+    document.getElementById("altaPrioridade")
+        .innerText = altaPrioridade;
 
     mostrarAlertas(atrasadas);
 
