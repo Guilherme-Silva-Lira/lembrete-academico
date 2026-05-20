@@ -2,6 +2,7 @@
 <html lang="pt-br" data-bs-theme="dark">
 
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -11,110 +12,179 @@
 
 <style>
 
-.container-box{
-    max-width: 650px;
+body{
+    min-height: 100vh;
+    background-color: #212529;
+    display: flex;
+    align-items: center;
+}
+
+.form-container{
+    width: 100%;
+    max-width: 800px;
     margin: auto;
+}
+
+.card-form{
+    background: #2b3035;
+    border-radius: 20px;
+}
+
+.logo{
+    width: 90px;
 }
 
 </style>
 
 </head>
 
-<body class="bg-body-tertiary d-flex align-items-center" style="min-height:100vh;">
+<body>
 
-<div class="container container-box">
+<div class="container">
 
-    <div class="card shadow-lg p-4">
+    <div class="card card-form shadow-lg p-5">
 
         <!-- TOPO -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="text-center mb-4">
 
-            <h3 id="tituloTela">Nova Atividade</h3>
+            <img src="logo.png2.png"
+                 class="logo mb-3">
 
-            <a href="dashboard.html" class="btn btn-outline-light">
-                ⬅ Dashboard
-            </a>
+            <h2 class="fw-bold">
+                Nova Atividade 📚
+            </h2>
+
+            <p class="text-secondary">
+                Cadastre e organize suas tarefas acadêmicas
+            </p>
 
         </div>
 
         <!-- FORM -->
-        <form onsubmit="salvarAtividade(event)">
+        <form id="formAtividade">
 
-            <div class="form-floating mb-3">
+            <div class="row">
 
-                <input
-                    type="text"
-                    class="form-control"
-                    id="titulo"
-                    placeholder="Título"
-                    required>
+                <!-- TÍTULO -->
+                <div class="col-md-6 mb-3">
 
-                <label for="titulo">Título</label>
+                    <label class="form-label">
+                        Título
+                    </label>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="titulo"
+                        placeholder="Ex: Trabalho de Matemática"
+                        required>
+
+                </div>
+
+                <!-- DISCIPLINA -->
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        Disciplina
+                    </label>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="disciplina"
+                        placeholder="Ex: Matemática"
+                        required>
+
+                </div>
 
             </div>
 
-            <div class="form-floating mb-3">
+            <div class="row">
 
-                <input
-                    type="text"
-                    class="form-control"
-                    id="disciplina"
-                    placeholder="Disciplina"
-                    required>
+                <!-- DATA -->
+                <div class="col-md-6 mb-3">
 
-                <label for="disciplina">Disciplina</label>
+                    <label class="form-label">
+                        Data de entrega
+                    </label>
+
+                    <input
+                        type="date"
+                        class="form-control"
+                        id="data"
+                        required>
+
+                </div>
+
+                <!-- PRIORIDADE -->
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        Prioridade
+                    </label>
+
+                    <select
+                        class="form-select"
+                        id="prioridade"
+                        required>
+
+                        <option value="">
+                            Selecione
+                        </option>
+
+                        <option value="Alta">
+                            🔴 Alta
+                        </option>
+
+                        <option value="Média">
+                            🟡 Média
+                        </option>
+
+                        <option value="Baixa">
+                            🟢 Baixa
+                        </option>
+
+                    </select>
+
+                </div>
 
             </div>
 
-            <div class="form-floating mb-3">
+            <!-- DESCRIÇÃO -->
+            <div class="mb-4">
+
+                <label class="form-label">
+                    Descrição
+                </label>
 
                 <textarea
                     class="form-control"
                     id="descricao"
-                    placeholder="Descrição"
-                    style="height:100px"></textarea>
-
-                <label for="descricao">Descrição</label>
-
-            </div>
-
-            <div class="form-floating mb-3">
-
-                <input
-                    type="date"
-                    class="form-control"
-                    id="dataEntrega"
-                    required>
-
-                <label for="dataEntrega">
-                    Data de entrega
-                </label>
+                    rows="4"
+                    placeholder="Descreva a atividade..."
+                    required></textarea>
 
             </div>
 
-            <div class="form-floating mb-4">
+            <!-- BOTÕES -->
+            <div class="d-flex gap-3">
 
-                <select
-                    class="form-select"
-                    id="prioridade"
-                    required>
+                <button
+                    type="submit"
+                    class="btn btn-success flex-fill py-2">
 
-                    <option value="">Selecione</option>
-                    <option value="Alta">Alta</option>
-                    <option value="Média">Média</option>
-                    <option value="Baixa">Baixa</option>
+                    Salvar atividade
 
-                </select>
+                </button>
 
-                <label for="prioridade">
-                    Prioridade
-                </label>
+                <a href="dashboard.html"
+                   class="btn btn-outline-light flex-fill py-2">
+
+                    Voltar ao dashboard
+
+                </a>
 
             </div>
-
-            <button class="btn btn-success w-100">
-                Salvar atividade
-            </button>
 
         </form>
 
@@ -124,74 +194,101 @@
 
 <script>
 
-let editarIndex = localStorage.getItem("editarIndex");
+const form =
+    document.getElementById("formAtividade");
 
-if(editarIndex !== null){
+const editarId =
+    localStorage.getItem("editarId");
 
-    let atividades =
-        JSON.parse(localStorage.getItem("atividades")) || [];
+let atividades =
+    JSON.parse(localStorage.getItem("atividades")) || [];
 
-    let atividade = atividades[editarIndex];
 
-    document.getElementById("titulo").value =
-        atividade.titulo;
+// EDITAR
+if(editarId){
 
-    document.getElementById("disciplina").value =
-        atividade.disciplina;
+    let atividade =
+        atividades.find(a => a.id == editarId);
 
-    document.getElementById("descricao").value =
-        atividade.descricao;
+    if(atividade){
 
-    document.getElementById("dataEntrega").value =
-        atividade.data;
+        document.getElementById("titulo")
+            .value = atividade.titulo;
 
-    document.getElementById("prioridade").value =
-        atividade.prioridade;
+        document.getElementById("disciplina")
+            .value = atividade.disciplina;
 
-    document.getElementById("tituloTela").innerText =
-        "Editar Atividade";
+        document.getElementById("data")
+            .value = atividade.data;
+
+        document.getElementById("prioridade")
+            .value = atividade.prioridade;
+
+        document.getElementById("descricao")
+            .value = atividade.descricao;
+
+    }
 
 }
 
-function salvarAtividade(event){
 
-    event.preventDefault();
+// SALVAR
+form.addEventListener("submit", function(e){
 
-    let atividades =
-        JSON.parse(localStorage.getItem("atividades")) || [];
+    e.preventDefault();
 
-    const atividade = {
+    let titulo =
+        document.getElementById("titulo").value;
 
-        titulo:
-            document.getElementById("titulo").value,
+    let disciplina =
+        document.getElementById("disciplina").value;
 
-        disciplina:
-            document.getElementById("disciplina").value,
+    let data =
+        document.getElementById("data").value;
 
-        descricao:
-            document.getElementById("descricao").value,
+    let prioridade =
+        document.getElementById("prioridade").value;
 
-        data:
-            document.getElementById("dataEntrega").value,
+    let descricao =
+        document.getElementById("descricao").value;
 
-        prioridade:
-            document.getElementById("prioridade").value
+    // NOVA ATIVIDADE
+    let novaAtividade = {
+
+        id: Date.now(),
+
+        titulo,
+        disciplina,
+        data,
+        prioridade,
+        descricao,
+
+        concluida: false
 
     };
 
-    if(editarIndex !== null){
+    // EDITAR
+    if(editarId){
 
-        atividades[editarIndex] = atividade;
+        let index =
+            atividades.findIndex(
+                a => a.id == editarId
+            );
 
-        localStorage.removeItem("editarIndex");
+        novaAtividade.id =
+            Number(editarId);
 
-        alert("Atividade atualizada!");
+        novaAtividade.concluida =
+            atividades[index].concluida;
+
+        atividades[index] =
+            novaAtividade;
+
+        localStorage.removeItem("editarId");
 
     }else{
 
-        atividades.push(atividade);
-
-        alert("Atividade cadastrada!");
+        atividades.push(novaAtividade);
 
     }
 
@@ -200,9 +297,12 @@ function salvarAtividade(event){
         JSON.stringify(atividades)
     );
 
-    window.location.href = "dashboard.html";
+    alert("Atividade salva com sucesso! ✅");
 
-}
+    window.location.href =
+        "dashboard.html";
+
+});
 
 </script>
 
