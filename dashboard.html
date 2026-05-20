@@ -147,7 +147,7 @@ body{
 
                 </div>
 
-                <p>Total</p>
+                <p>Total pendentes</p>
 
             </div>
 
@@ -311,18 +311,13 @@ function carregarAtividades(){
 
     });
 
-    let total = atividades.length;
-
     let atrasadas = 0;
 
     let altaPrioridade = 0;
 
     let pendentes = 0;
 
-    document.getElementById("totalAtividades")
-        .innerText = total;
-
-    if(total === 0){
+    if(atividades.length === 0){
 
         container.innerHTML = `
 
@@ -341,6 +336,9 @@ function carregarAtividades(){
         document.getElementById("proximaEntrega")
             .innerHTML =
             "Nenhuma atividade cadastrada";
+
+        document.getElementById("totalAtividades")
+            .innerText = 0;
 
         return;
 
@@ -400,12 +398,6 @@ function carregarAtividades(){
             return;
         }
 
-        if(atividade.prioridade === "Alta"){
-
-            altaPrioridade++;
-
-        }
-
         let hoje = new Date();
 
         hoje.setHours(0,0,0,0);
@@ -419,12 +411,25 @@ function carregarAtividades(){
         let concluida =
             atividade.concluida === true;
 
+        // PENDENTES
         if(!concluida){
 
             pendentes++;
 
         }
 
+        // ALTA PRIORIDADE
+        if(
+            atividade.prioridade === "Alta"
+            &&
+            !concluida
+        ){
+
+            altaPrioridade++;
+
+        }
+
+        // ATRASADAS
         if(atrasada && !concluida){
 
             atrasadas++;
@@ -581,11 +586,15 @@ function carregarAtividades(){
 
     });
 
-    document.getElementById("atrasadas")
-        .innerText = atrasadas;
+    // CONTADORES
+    document.getElementById("totalAtividades")
+        .innerText = pendentes;
 
     document.getElementById("pendentes")
         .innerText = pendentes;
+
+    document.getElementById("atrasadas")
+        .innerText = atrasadas;
 
     document.getElementById("altaPrioridade")
         .innerText = altaPrioridade;
