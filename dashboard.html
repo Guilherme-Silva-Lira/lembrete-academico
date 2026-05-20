@@ -13,29 +13,27 @@
 
 body{
     min-height: 100vh;
+    background:  #212529;
 }
 
 .container-box{
-    max-width: 1100px;
+    max-width: 1200px;
     margin: auto;
 }
 
 .card{
-    border-radius: 15px;
+    border-radius: 18px;
     transition: 0.2s;
+    border: none;
 }
 
 .card:hover{
-    transform: scale(1.01);
-}
-
-.atrasada{
-    border: 2px solid #dc3545;
+    transform: translateY(-3px);
 }
 
 .stats-card{
     text-align: center;
-    padding: 20px;
+    padding: 25px;
 }
 
 .stats-number{
@@ -47,36 +45,102 @@ body{
     max-width: 400px;
 }
 
+.badge-prioridade{
+    font-size: 0.8rem;
+    padding: 8px 12px;
+    border-radius: 20px;
+}
+
+.prioridade-alta{
+    background-color: #dc3545;
+}
+
+.prioridade-media{
+    background-color: #ffc107;
+    color: black;
+}
+
+.prioridade-baixa{
+    background-color: #198754;
+}
+
+.atrasada{
+    border-left: 8px solid #dc3545;
+}
+
+.em-dia{
+    border-left: 8px solid #198754;
+}
+
+.card-atividade{
+    background: #2a2a40;
+}
+
+.topbar{
+    background:  #212529;
+    border-radius: 18px;
+    padding: 20px;
+}
+
 </style>
 
 </head>
 
-<body class="bg-body-tertiary">
+<body>
 
 <div class="container py-5 container-box">
 
     <!-- TOPO -->
-    <div class="text-center mb-5">
+    <div class="topbar shadow mb-5">
 
-        <h1 class="fw-bold">
-            Dashboard Acadêmico
-        </h1>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
 
-        <p class="text-secondary">
-            Organize suas atividades 📚
-        </p>
+            <div>
+
+                <h1 class="fw-bold mb-1">
+                    Dashboard Acadêmico 📚
+                </h1>
+
+                <p class="text-secondary mb-0">
+                    Organize suas atividades e prioridades
+                </p>
+
+            </div>
+
+            <div class="d-flex gap-2">
+
+                <a href="atividade.html"
+                   class="btn btn-success">
+
+                    + Nova atividade
+
+                </a>
+
+                <a href="index.html"
+                   class="btn btn-outline-light">
+
+                    Sair
+
+                </a>
+
+            </div>
+
+        </div>
 
     </div>
 
     <!-- ESTATÍSTICAS -->
-    <div class="row g-3 mb-4">
+    <div class="row g-4 mb-5">
 
-        <div class="col-md-4">
+        <div class="col-md-3">
 
-            <div class="card stats-card shadow-sm">
+            <div class="card stats-card shadow">
 
-                <div class="stats-number" id="totalAtividades">
+                <div class="stats-number"
+                     id="totalAtividades">
+
                     0
+
                 </div>
 
                 <p>Total</p>
@@ -85,13 +149,15 @@ body{
 
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-3">
 
-            <div class="card stats-card shadow-sm">
+            <div class="card stats-card shadow">
 
                 <div class="stats-number text-warning"
                      id="pendentes">
+
                     0
+
                 </div>
 
                 <p>Pendentes</p>
@@ -100,13 +166,15 @@ body{
 
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-3">
 
-            <div class="card stats-card shadow-sm">
+            <div class="card stats-card shadow">
 
                 <div class="stats-number text-danger"
                      id="atrasadas">
+
                     0
+
                 </div>
 
                 <p>Atrasadas</p>
@@ -115,17 +183,27 @@ body{
 
         </div>
 
+        <div class="col-md-3">
+
+            <div class="card stats-card shadow">
+
+                <div class="stats-number text-success"
+                     id="emDia">
+
+                    0
+
+                </div>
+
+                <p>Em dia</p>
+
+            </div>
+
+        </div>
+
     </div>
 
-    <!-- CONTROLES -->
-    <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center mb-4">
-
-        <a href="atividade.html"
-           class="btn btn-success">
-
-           + Nova atividade
-
-        </a>
+    <!-- PESQUISA -->
+    <div class="mb-4">
 
         <input
             type="text"
@@ -133,13 +211,6 @@ body{
             class="form-control search-box"
             placeholder="Pesquisar atividade..."
             onkeyup="carregarAtividades()">
-
-        <a href="index.html"
-           class="btn btn-outline-light">
-
-           Sair
-
-        </a>
 
     </div>
 
@@ -160,6 +231,27 @@ function formatarData(data){
 
 }
 
+function prioridadeValor(prioridade){
+
+    if(prioridade === "Alta") return 1;
+    if(prioridade === "Média") return 2;
+
+    return 3;
+
+}
+
+function classePrioridade(prioridade){
+
+    if(prioridade === "Alta")
+        return "prioridade-alta";
+
+    if(prioridade === "Média")
+        return "prioridade-media";
+
+    return "prioridade-baixa";
+
+}
+
 function carregarAtividades(){
 
     let atividades =
@@ -169,13 +261,33 @@ function carregarAtividades(){
         document.getElementById("listaAtividades");
 
     let pesquisa =
-        document.getElementById("pesquisa").value
+        document.getElementById("pesquisa")
+        .value
         .toLowerCase();
 
     container.innerHTML = "";
 
+    // ORDENAR
+    atividades.sort((a, b) => {
+
+        let prioridade =
+            prioridadeValor(a.prioridade)
+            -
+            prioridadeValor(b.prioridade);
+
+        if(prioridade !== 0)
+            return prioridade;
+
+        return new Date(a.data)
+            -
+            new Date(b.data);
+
+    });
+
     let total = atividades.length;
+
     let atrasadas = 0;
+    let emDia = 0;
 
     document.getElementById("totalAtividades")
         .innerText = total;
@@ -183,11 +295,17 @@ function carregarAtividades(){
     if(total === 0){
 
         container.innerHTML = `
-            <div class="text-center mt-5">
-                <h5 class="text-secondary">
-                    Nenhuma atividade cadastrada 😢
-                </h5>
-            </div>
+
+        <div class="text-center mt-5">
+
+            <h4 class="text-secondary">
+
+                Nenhuma atividade cadastrada 😢
+
+            </h4>
+
+        </div>
+
         `;
 
         return;
@@ -197,23 +315,37 @@ function carregarAtividades(){
     atividades.forEach((atividade, index) => {
 
         if(
-            !atividade.titulo.toLowerCase()
+            !atividade.titulo
+            .toLowerCase()
             .includes(pesquisa)
         ){
             return;
         }
 
         let hoje = new Date();
-        let dataEntrega = new Date(atividade.data);
 
-        let atrasada = dataEntrega < hoje;
+        hoje.setHours(0,0,0,0);
+
+        let dataEntrega =
+            new Date(atividade.data);
+
+        let atrasada =
+            dataEntrega < hoje;
 
         if(atrasada){
+
             atrasadas++;
+
+        }else{
+
+            emDia++;
+
         }
 
         let classe =
-            atrasada ? "atrasada" : "";
+            atrasada
+            ? "atrasada"
+            : "em-dia";
 
         let status =
             atrasada
@@ -224,41 +356,71 @@ function carregarAtividades(){
                     Em dia
                </span>`;
 
+        let prioridadeClasse =
+            classePrioridade(
+                atividade.prioridade
+            );
+
         let card = `
 
-        <div class="card shadow-sm p-4 mb-4 ${classe}">
+        <div class="card card-atividade shadow p-4 mb-4 ${classe}">
 
-            <div class="d-flex justify-content-between flex-wrap gap-3">
+            <div class="d-flex justify-content-between flex-wrap gap-4">
 
-                <div>
+                <div class="flex-grow-1">
 
-                    <h4>${atividade.titulo}</h4>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+
+                        <h3 class="mb-0">
+
+                            ${atividade.titulo}
+
+                        </h3>
+
+                        <span class="badge badge-prioridade ${prioridadeClasse}">
+
+                            ${atividade.prioridade}
+
+                        </span>
+
+                    </div>
 
                     <p class="text-secondary">
+
                         ${atividade.descricao}
+
                     </p>
 
-                    <p>
-                        <strong>Disciplina:</strong>
-                        ${atividade.disciplina}
-                    </p>
+                    <div class="d-flex flex-wrap gap-4 mt-3">
 
-                    <p>
-                        <strong>Entrega:</strong>
-                        ${formatarData(atividade.data)}
-                    </p>
+                        <p class="mb-0">
 
-                    <p>
-                        <strong>Prioridade:</strong>
-                        ${atividade.prioridade}
-                    </p>
+                            📘
+                            <strong>Disciplina:</strong>
+                            ${atividade.disciplina}
 
-                    ${status}
+                        </p>
+
+                        <p class="mb-0">
+
+                            📅
+                            <strong>Entrega:</strong>
+                            ${formatarData(atividade.data)}
+
+                        </p>
+
+                    </div>
+
+                    <div class="mt-3">
+
+                        ${status}
+
+                    </div>
 
                 </div>
 
                 <!-- BOTÕES -->
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 align-items-start">
 
                     <button
                         class="btn btn-warning"
@@ -294,6 +456,9 @@ function carregarAtividades(){
     document.getElementById("pendentes")
         .innerText = total - atrasadas;
 
+    document.getElementById("emDia")
+        .innerText = emDia;
+
     mostrarAlertas(atrasadas);
 
 }
@@ -307,9 +472,9 @@ function mostrarAlertas(atrasadas){
 
         alerta.innerHTML = `
 
-        <div class="alert alert-danger">
+        <div class="alert alert-danger shadow-sm">
 
-            Você possui
+            ⚠️ Você possui
             <strong>${atrasadas}</strong>
             atividade(s) atrasada(s)!
 
@@ -355,7 +520,8 @@ function editarAtividade(index){
         index
     );
 
-    window.location.href = "atividade.html";
+    window.location.href =
+        "atividade.html";
 
 }
 
