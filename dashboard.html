@@ -290,6 +290,12 @@ function carregarAtividades(){
     // ORDENAR
     atividades.sort((a, b) => {
 
+        // concluídas vão para o final
+        if(a.concluida && !b.concluida) return 1;
+
+        if(!a.concluida && b.concluida) return -1;
+
+        // prioridade
         let prioridade =
             prioridadeValor(a.prioridade)
             -
@@ -298,6 +304,7 @@ function carregarAtividades(){
         if(prioridade !== 0)
             return prioridade;
 
+        // data
         return new Date(a.data)
             -
             new Date(b.data);
@@ -309,6 +316,8 @@ function carregarAtividades(){
     let atrasadas = 0;
 
     let altaPrioridade = 0;
+
+    let pendentes = 0;
 
     document.getElementById("totalAtividades")
         .innerText = total;
@@ -338,32 +347,50 @@ function carregarAtividades(){
     }
 
     // PRÓXIMA ENTREGA
-    let proxima = atividades[0];
+    let proxima =
+        atividades.find(a => !a.concluida);
 
-    document.getElementById("proximaEntrega")
-        .innerHTML = `
+    if(proxima){
 
-        <h5 class="mb-2">
+        document.getElementById("proximaEntrega")
+            .innerHTML = `
 
-            ${proxima.titulo}
+            <h5 class="mb-2">
 
-        </h5>
+                ${proxima.titulo}
 
-        <p class="mb-1">
+            </h5>
 
-            📘 ${proxima.disciplina}
+            <p class="mb-1">
 
-        </p>
+                📘 ${proxima.disciplina}
 
-        <p class="mb-0">
+            </p>
 
-            📅 ${formatarData(proxima.data)}
+            <p class="mb-0">
 
-        </p>
+                📅 ${formatarData(proxima.data)}
 
-        `;
+            </p>
 
-    atividades.forEach((atividade, index) => {
+            `;
+
+    }else{
+
+        document.getElementById("proximaEntrega")
+            .innerHTML = `
+
+            <div class="alert alert-success mb-0">
+
+                🎉 Nenhuma atividade pendente!
+
+            </div>
+
+            `;
+
+    }
+
+    atividades.forEach((atividade) => {
 
         if(
             !atividade.titulo
@@ -389,25 +416,64 @@ function carregarAtividades(){
         let atrasada =
             dataEntrega < hoje;
 
-        if(atrasada){
+        let concluida =
+            atividade.concluida === true;
+
+        if(!concluida){
+
+            pendentes++;
+
+        }
+
+        if(atrasada && !concluida){
 
             atrasadas++;
 
         }
 
-        let classe =
-            atrasada
-            ? "atrasada"
-            : "em-dia";
+        let classe = "";
 
-        let status =
-            atrasada
-            ? `<span class="badge bg-danger">
+        if(concluida){
+
+            classe = "opacity-50";
+
+        }else if(atrasada){
+
+            classe = "atrasada";
+
+        }else{
+
+            classe = "em-dia";
+
+        }
+
+        let status = "";
+
+        if(concluida){
+
+            status = `
+                <span class="badge bg-primary">
+                    Concluída
+                </span>
+            `;
+
+        }else if(atrasada){
+
+            status = `
+                <span class="badge bg-danger">
                     Atrasada
-               </span>`
-            : `<span class="badge bg-success">
+                </span>
+            `;
+
+        }else{
+
+            status = `
+                <span class="badge bg-success">
                     Em dia
-               </span>`;
+                </span>
+            `;
+
+        }
 
         let prioridadeClasse =
             classePrioridade(
@@ -475,9 +541,21 @@ function carregarAtividades(){
                 <!-- BOTÕES -->
                 <div class="d-flex gap-2 align-items-start">
 
+                    ${!concluida ? `
+
+                    <button
+                        class="btn btn-success"
+                        onclick="concluirAtividade(${atividade.id})">
+
+                        ✔
+
+                    </button>
+
+                    ` : ""}
+
                     <button
                         class="btn btn-warning"
-                        onclick="editarAtividade(${index})">
+                        onclick="editarAtividade(${atividade.id})">
 
                         ✏️
 
@@ -485,7 +563,7 @@ function carregarAtividades(){
 
                     <button
                         class="btn btn-danger"
-                        onclick="excluirAtividade(${index})">
+                        onclick="excluirAtividade(${atividade.id})">
 
                         🗑️
 
@@ -507,7 +585,7 @@ function carregarAtividades(){
         .innerText = atrasadas;
 
     document.getElementById("pendentes")
-        .innerText = total - atrasadas;
+        .innerText = pendentes;
 
     document.getElementById("altaPrioridade")
         .innerText = altaPrioridade;
@@ -537,13 +615,44 @@ function mostrarAlertas(atrasadas){
 
     }else{
 
-        alerta.innerHTML = "";
+        alerta.innerHTML = `
+
+        <div class="alert alert-success shadow-sm">
+
+            ✅ Você está em dia com suas atividades!
+
+        </div>
+
+        `;
 
     }
 
 }
 
-function excluirAtividade(index){
+function concluirAtividade(id){
+
+    let atividades =
+        JSON.parse(localStorage.getItem("atividades")) || [];
+
+    let atividade =
+        atividades.find(a => a.id == id);
+
+    if(atividade){
+
+        atividade.concluida = true;
+
+    }
+
+    localStorage.setItem(
+        "atividades",
+        JSON.stringify(atividades)
+    );
+
+    carregarAtividades();
+
+}
+
+function excluirAtividade(id){
 
     let atividades =
         JSON.parse(localStorage.getItem("atividades")) || [];
@@ -553,7 +662,8 @@ function excluirAtividade(index){
 
     if(confirmar){
 
-        atividades.splice(index, 1);
+        atividades =
+            atividades.filter(a => a.id != id);
 
         localStorage.setItem(
             "atividades",
@@ -566,11 +676,11 @@ function excluirAtividade(index){
 
 }
 
-function editarAtividade(index){
+function editarAtividade(id){
 
     localStorage.setItem(
-        "editarIndex",
-        index
+        "editarId",
+        id
     );
 
     window.location.href =
