@@ -16,12 +16,12 @@ body{
 }
 
 .container-box{
-    max-width: 900px;
+    max-width: 1100px;
     margin: auto;
 }
 
 .card{
-    border-radius: 12px;
+    border-radius: 15px;
     transition: 0.2s;
 }
 
@@ -33,8 +33,18 @@ body{
     border: 2px solid #dc3545;
 }
 
-.badge-atrasada{
-    background-color: #dc3545;
+.stats-card{
+    text-align: center;
+    padding: 20px;
+}
+
+.stats-number{
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.search-box{
+    max-width: 400px;
 }
 
 </style>
@@ -48,26 +58,93 @@ body{
     <!-- TOPO -->
     <div class="text-center mb-5">
 
-        <h1 class="fw-bold">Dashboard de Atividades</h1>
+        <h1 class="fw-bold">
+            Dashboard Acadêmico
+        </h1>
 
         <p class="text-secondary">
-            Gerencie suas tarefas acadêmicas 📚
+            Organize suas atividades 📚
         </p>
 
     </div>
 
-    <!-- BOTÕES -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- ESTATÍSTICAS -->
+    <div class="row g-3 mb-4">
 
-        <a href="atividade.html" class="btn btn-success">
-            + Nova atividade
+        <div class="col-md-4">
+
+            <div class="card stats-card shadow-sm">
+
+                <div class="stats-number" id="totalAtividades">
+                    0
+                </div>
+
+                <p>Total</p>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card stats-card shadow-sm">
+
+                <div class="stats-number text-warning"
+                     id="pendentes">
+                    0
+                </div>
+
+                <p>Pendentes</p>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card stats-card shadow-sm">
+
+                <div class="stats-number text-danger"
+                     id="atrasadas">
+                    0
+                </div>
+
+                <p>Atrasadas</p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- CONTROLES -->
+    <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center mb-4">
+
+        <a href="atividade.html"
+           class="btn btn-success">
+
+           + Nova atividade
+
         </a>
 
-        <a href="index.html" class="btn btn-outline-light">
-            Sair
+        <input
+            type="text"
+            id="pesquisa"
+            class="form-control search-box"
+            placeholder="Pesquisar atividade..."
+            onkeyup="carregarAtividades()">
+
+        <a href="index.html"
+           class="btn btn-outline-light">
+
+           Sair
+
         </a>
 
     </div>
+
+    <!-- ALERTA -->
+    <div id="alerta"></div>
 
     <!-- LISTA -->
     <div id="listaAtividades"></div>
@@ -77,18 +154,33 @@ body{
 <script>
 
 function formatarData(data){
-    return new Date(data).toLocaleDateString('pt-BR');
+
+    return new Date(data)
+        .toLocaleDateString("pt-BR");
+
 }
 
 function carregarAtividades(){
 
-    let atividades = JSON.parse(localStorage.getItem("atividades")) || [];
+    let atividades =
+        JSON.parse(localStorage.getItem("atividades")) || [];
 
-    let container = document.getElementById("listaAtividades");
+    let container =
+        document.getElementById("listaAtividades");
+
+    let pesquisa =
+        document.getElementById("pesquisa").value
+        .toLowerCase();
 
     container.innerHTML = "";
 
-    if(atividades.length === 0){
+    let total = atividades.length;
+    let atrasadas = 0;
+
+    document.getElementById("totalAtividades")
+        .innerText = total;
+
+    if(total === 0){
 
         container.innerHTML = `
             <div class="text-center mt-5">
@@ -99,32 +191,50 @@ function carregarAtividades(){
         `;
 
         return;
+
     }
 
     atividades.forEach((atividade, index) => {
+
+        if(
+            !atividade.titulo.toLowerCase()
+            .includes(pesquisa)
+        ){
+            return;
+        }
 
         let hoje = new Date();
         let dataEntrega = new Date(atividade.data);
 
         let atrasada = dataEntrega < hoje;
 
-        let cardClasse = atrasada ? "atrasada" : "";
+        if(atrasada){
+            atrasadas++;
+        }
 
-        let status = atrasada
-        ? `<span class="badge badge-atrasada">Atrasada</span>`
-        : `<span class="badge bg-success">Em dia</span>`;
+        let classe =
+            atrasada ? "atrasada" : "";
+
+        let status =
+            atrasada
+            ? `<span class="badge bg-danger">
+                    Atrasada
+               </span>`
+            : `<span class="badge bg-success">
+                    Em dia
+               </span>`;
 
         let card = `
 
-        <div class="card shadow-sm p-4 mb-4 ${cardClasse}">
+        <div class="card shadow-sm p-4 mb-4 ${classe}">
 
-            <div class="d-flex justify-content-between align-items-start">
+            <div class="d-flex justify-content-between flex-wrap gap-3">
 
                 <div>
 
                     <h4>${atividade.titulo}</h4>
 
-                    <p class="text-secondary mb-2">
+                    <p class="text-secondary">
                         ${atividade.descricao}
                     </p>
 
@@ -153,13 +263,17 @@ function carregarAtividades(){
                     <button
                         class="btn btn-warning"
                         onclick="editarAtividade(${index})">
+
                         ✏️
+
                     </button>
 
                     <button
                         class="btn btn-danger"
                         onclick="excluirAtividade(${index})">
+
                         🗑️
+
                     </button>
 
                 </div>
@@ -174,13 +288,50 @@ function carregarAtividades(){
 
     });
 
+    document.getElementById("atrasadas")
+        .innerText = atrasadas;
+
+    document.getElementById("pendentes")
+        .innerText = total - atrasadas;
+
+    mostrarAlertas(atrasadas);
+
+}
+
+function mostrarAlertas(atrasadas){
+
+    let alerta =
+        document.getElementById("alerta");
+
+    if(atrasadas > 0){
+
+        alerta.innerHTML = `
+
+        <div class="alert alert-danger">
+
+            Você possui
+            <strong>${atrasadas}</strong>
+            atividade(s) atrasada(s)!
+
+        </div>
+
+        `;
+
+    }else{
+
+        alerta.innerHTML = "";
+
+    }
+
 }
 
 function excluirAtividade(index){
 
-    let atividades = JSON.parse(localStorage.getItem("atividades")) || [];
+    let atividades =
+        JSON.parse(localStorage.getItem("atividades")) || [];
 
-    let confirmar = confirm("Deseja excluir esta atividade?");
+    let confirmar =
+        confirm("Deseja excluir esta atividade?");
 
     if(confirmar){
 
@@ -199,7 +350,10 @@ function excluirAtividade(index){
 
 function editarAtividade(index){
 
-    localStorage.setItem("editarIndex", index);
+    localStorage.setItem(
+        "editarIndex",
+        index
+    );
 
     window.location.href = "atividade.html";
 
